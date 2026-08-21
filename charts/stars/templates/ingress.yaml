@@ -5,9 +5,22 @@ metadata:
   name: {{ include "stars.fullname" . }}
   labels: {{- include "stars.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+    {{- if .Values.ingress.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote }}
+    {{- else if .Values.ingress.issuer }}
+    cert-manager.io/issuer: {{ .Values.ingress.issuer | quote }}
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: {{ .Values.ingress.tls.secretName | default (printf "%s-tls" (include "stars.fullname" .)) }}
+  {{- end }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:

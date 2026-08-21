@@ -15,6 +15,15 @@ ingress:
   enabled: true
   className: nginx
   host: stars.local
+  # cert-manager: set clusterIssuer (or issuer) so ingress-shim requests a
+  # per-host certificate via the issuer's DNS-01 solver. Leave empty to skip.
+  clusterIssuer: ""
+  # Set one of clusterIssuer/issuer; clusterIssuer takes precedence.
+  issuer: ""
+  tls:
+    enabled: false
+    # Secret cert-manager writes the cert into. Defaults to <fullname>-tls.
+    secretName: ""
   # Authelia forward-auth annotations (adjust URLs to your Authelia install).
   annotations:
     nginx.ingress.kubernetes.io/auth-url: "http://authelia.authelia.svc.cluster.local/api/verify"

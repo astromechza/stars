@@ -62,7 +62,19 @@ The app trusts the `Remote-User` / `Remote-Email` / `Remote-Name` headers, so it
   It deploys to Kubernetes with an Authelia-annotated ingress and a
   `PersistentVolumeClaim` for the SQLite file (single replica, `Recreate`
   strategy — SQLite is single-writer). Override values as usual, e.g.
-  `--set ingress.host=stars.example.com --set ingress.className=traefik`.
+
+  ```bash
+  helm install stars oci://ghcr.io/astromechza/charts/stars --version 0.1.0 \
+    --set ingress.host=stars.example.com \
+    --set ingress.className=traefik \
+    --set ingress.clusterIssuer=letsencrypt-dns01 \
+    --set ingress.tls.enabled=true
+  ```
+
+  Setting `ingress.clusterIssuer` (or `ingress.issuer`) plus
+  `ingress.tls.enabled` makes cert-manager's ingress-shim request a per-host
+  certificate from that issuer's DNS-01 solver; the cert is stored in
+  `ingress.tls.secretName` (defaults to `<release>-stars-tls`).
 
 ### Versioning
 
