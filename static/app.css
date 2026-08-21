@@ -1,46 +1,194 @@
+/* ---- Design tokens ---------------------------------------------------- */
 :root {
-  --bg: #f6f6f4; --fg: #222; --tab-bg: #e6e6e2; --tab-active: #fff;
-  --cell-off: #d9d9d4; --cell-border: #c7c7c0;
-  --gold: #f2c14e; --gold-glow: rgba(242,193,78,.75);
+  --bg: #eceae5;
+  --panel: #f8f7f4;
+  --panel-border: #d7d3ca;
+  --fg: #1c1d21;
+  --muted: #6b6d72;
+  --surface: #ffffff;
+  --surface-hover: #efece5;
+  --surface-border: #cbc7be;
+  --cell-off: #e1ded7;
+  --cell-border: #cac6bd;
+  --gold: #d99b1c;
+  --gold-glow: rgba(217, 155, 28, .45);
+  --gold-ink: #3a2d00;
   --accent: #2a9d8f;
+  --radius: 8px;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #16171a; --fg: #e8e8e6; --tab-bg: #222; --tab-active: #2c2c31;
-    --cell-off: #26262b; --cell-border: #34343b;
-    --gold: #f2c14e; --gold-glow: rgba(242,193,78,.6); --accent: #2a9d8f;
+  :root:not([data-theme="light"]) {
+    --bg: #0e0f11;
+    --panel: #17191d;
+    --panel-border: #2b2f36;
+    --fg: #ececee;
+    --muted: #9aa0a8;
+    --surface: #23262c;
+    --surface-hover: #2d3138;
+    --surface-border: #383d45;
+    --cell-off: #23262c;
+    --cell-border: #3c414a;
+    --gold: #f2c14e;
+    --gold-glow: rgba(242, 193, 78, .55);
+    --gold-ink: #3a2d00;
+    --accent: #35b6a5;
   }
 }
-body { background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; }
-.app { max-width: 1100px; margin: 0 auto; padding: 1rem; }
-.tabs { display: flex; gap: .25rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
-.tab { padding: .4rem .8rem; background: var(--tab-bg); border-radius: 6px 6px 0 0;
-  text-decoration: none; color: var(--fg); }
-.tab--active { background: var(--tab-active); font-weight: 600; }
-.tab-new button { border: none; background: var(--tab-bg); border-radius: 6px;
-  width: 2rem; height: 2rem; cursor: pointer; color: var(--fg); }
-.grid__nav { display: flex; gap: 1rem; align-items: center; justify-content: center;
-  margin-bottom: .75rem; }
-.grid__nav button { min-width: 2rem; cursor: pointer; }
-.grid__nav button:disabled { opacity: .35; cursor: not-allowed; }
-.grid__cols { display: flex; gap: .35rem; overflow-x: auto; }
-.col { display: flex; flex-direction: column; gap: .25rem; }
-.col__label { text-align: center; font-size: .8rem; text-transform: uppercase; }
-.cell { width: 2rem; height: 2rem; border: 1px solid var(--cell-border);
-  border-radius: 6px; background: var(--cell-off); color: var(--fg);
-  font-size: .7rem; cursor: pointer; padding: 0; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app { max-width: 820px; margin: 0 auto; padding: 1.25rem 1.25rem 3rem; }
+
+/* ---- Tabs -------------------------------------------------------------- */
+.tabs {
+  display: flex;
+  gap: .35rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.tab {
+  padding: .45rem .9rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: .95rem;
+}
+.tab:hover { background: var(--surface-hover); color: var(--fg); }
+.tab--active {
+  background: var(--surface-hover);
+  color: var(--fg);
+  font-weight: 700;
+  border-color: var(--gold);
+  box-shadow: inset 0 -2px 0 0 var(--gold);
+}
+
+/* ---- Shared control style (buttons + inputs) --------------------------- */
+.tab-new button,
+.grid__nav button,
+.board-manage button,
+.board-manage input[type="text"] {
+  font: inherit;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  padding: .45rem .8rem;
+}
+.tab-new button,
+.grid__nav button,
+.board-manage button { cursor: pointer; font-weight: 600; }
+.tab-new button:hover,
+.grid__nav button:not(:disabled):hover,
+.board-manage button:hover { background: var(--surface-hover); border-color: var(--gold); }
+.tab-new button { width: 2.4rem; height: 2.4rem; padding: 0; font-size: 1.2rem; line-height: 1; }
+.grid__nav button:disabled { opacity: .3; cursor: not-allowed; }
+
+:where(a, button, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Board panel + grid ------------------------------------------------ */
+.board-title { text-align: center; margin: 0 0 .75rem; letter-spacing: -.01em; }
+
+.grid {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 1.1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 8px 28px rgba(0, 0, 0, .18);
+}
+.grid__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.grid__nav button { min-width: 2.4rem; }
+.grid__year { font-weight: 700; font-size: 1.1rem; min-width: 4ch; text-align: center; }
+
+.grid__cols {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 12), minmax(1.9rem, 1fr));
+  gap: .4rem;
+  overflow-x: auto;
+}
+.col { display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+.col__label {
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .2rem;
+}
+
+.cell {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cell-border);
+  border-radius: var(--radius);
+  background: var(--cell-off);
+  color: var(--muted);
+  font-size: .8rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  padding: 0;
+}
+.cell:hover { border-color: var(--gold); color: var(--fg); }
 .cell--empty { visibility: hidden; }
+
 /* State 1: outline glow — dim interior, gold ring. */
-.cell--outline { border-color: var(--gold); color: var(--gold); font-weight: 700;
-  box-shadow: 0 0 6px 1px var(--gold-glow); }
+.cell--outline {
+  border-color: var(--gold);
+  color: var(--gold);
+  font-weight: 700;
+  box-shadow: 0 0 6px 1px var(--gold-glow);
+}
 /* State 2: full glow — whole shape lit. */
-.cell--full { background: var(--gold); border-color: var(--gold);
-  box-shadow: 0 0 10px 3px var(--gold-glow); color: #3a2d00; font-weight: 700; }
-.empty { text-align: center; padding: 3rem 0; }
-.board-title { text-align: center; }
-.board-manage { display: flex; gap: .5rem; align-items: center; justify-content: center;
-  margin-bottom: 1rem; flex-wrap: wrap; }
-.board-manage input[type="text"] { padding: .35rem .5rem; border: 1px solid var(--cell-border);
-  border-radius: 6px; background: var(--tab-bg); color: var(--fg); }
-.board-manage button { padding: .35rem .8rem; border: none; border-radius: 6px;
-  background: var(--tab-bg); color: var(--fg); cursor: pointer; }
+.cell--full {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px 3px var(--gold-glow);
+  color: var(--gold-ink);
+  font-weight: 700;
+}
+/* Today: a white ring visible over any state (outline is independent of
+   border + box-shadow, so it never fights the gold state styling). */
+.cell--today { outline: 2px solid #fff; outline-offset: -2px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cell, .tab, .tab-new button, .grid__nav button, .board-manage button {
+    transition: background-color .12s ease, border-color .12s ease,
+                box-shadow .12s ease, color .12s ease;
+  }
+}
+
+/* ---- Board management + empty state ------------------------------------ */
+.board-manage {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.board-manage input[type="text"] { min-width: 12rem; }
+.empty { text-align: center; padding: 3rem 0; color: var(--muted); }
