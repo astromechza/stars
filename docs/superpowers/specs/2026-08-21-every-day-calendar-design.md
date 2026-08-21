@@ -138,12 +138,24 @@ Rules:
 | Method | Path                              | Purpose                                          |
 |--------|-----------------------------------|--------------------------------------------------|
 | GET    | `/`                               | Redirect to the user's most recent active board (or an empty state if none). |
-| GET    | `/boards/:id?year=YYYY`           | Full page: tab bar + grid for the given/current year. |
-| GET    | `/boards/:id/grid?year=YYYY`      | Grid fragment only (for year `<`/`>` navigation). |
+| GET    | `/boards/:id?year=YYYY`           | Full page **or** grid fragment for the given/current year, chosen by the `HX-Request` header (see below). |
 | POST   | `/boards/:id/toggle`              | Body `{year, month, day}`; flip cell; return updated cell fragment. |
 | POST   | `/boards`                         | Create board; redirect to it.                    |
 | POST   | `/boards/:id/rename`              | Body `{name}`; return updated tab fragment.      |
 | POST   | `/boards/:id/archive`             | Soft-archive; return updated tab bar / redirect. |
+
+Fresh-load vs fragment:
+
+- HTMX sets the `HX-Request: true` header on every request it issues. Handlers
+  that back both a full page and a fragment inspect this header: absent (a
+  browser address-bar load, refresh, or bookmark) → render the full document
+  (layout + tab bar + grid); present → render only the fragment (the grid).
+- This lets `GET /boards/:id` serve both the initial page and the year
+  `<`/`>` navigation without a separate grid route. The `<`/`>` controls use
+  `hx-get="/boards/:id?year=N"` targeting the grid container, so a direct
+  visit to that same URL still yields a complete, shareable page.
+- A tiny extractor (e.g. `HxRequest(bool)`) centralises reading the header so
+  handlers stay readable.
 
 Interaction details:
 
