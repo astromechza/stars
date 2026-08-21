@@ -3,7 +3,7 @@ use crate::auth::UserId;
 use crate::calendar::is_valid_day;
 use crate::templates::CellTemplate;
 use askama::Template;
-use axum::Json;
+use axum::Form;
 use axum::extract::{Path, State};
 use axum::response::Response;
 use serde::Deserialize;
@@ -19,7 +19,7 @@ pub async fn toggle(
     State(state): State<AppState>,
     UserId(uid): UserId,
     Path(id): Path<i64>,
-    Json(p): Json<TogglePayload>,
+    Form(p): Form<TogglePayload>,
 ) -> Result<Response, AppError> {
     // Ownership check (404 if not the user's board).
     let board = state
@@ -71,8 +71,8 @@ mod tests {
         let resp = app
             .oneshot(
                 Request::post(format!("/boards/{bid}/toggle"))
-                    .header("content-type", "application/json")
-                    .body(Body::from(r#"{"year":2026,"month":3,"day":15}"#))
+                    .header("content-type", "application/x-www-form-urlencoded")
+                    .body(Body::from("year=2026&month=3&day=15"))
                     .unwrap(),
             )
             .await
@@ -89,8 +89,8 @@ mod tests {
         let resp = app
             .oneshot(
                 Request::post(format!("/boards/{bid}/toggle"))
-                    .header("content-type", "application/json")
-                    .body(Body::from(r#"{"year":2026,"month":2,"day":30}"#))
+                    .header("content-type", "application/x-www-form-urlencoded")
+                    .body(Body::from("year=2026&month=2&day=30"))
                     .unwrap(),
             )
             .await
@@ -112,8 +112,8 @@ mod tests {
         let resp = app
             .oneshot(
                 Request::post(format!("/boards/{}/toggle", board.id))
-                    .header("content-type", "application/json")
-                    .body(Body::from(r#"{"year":2026,"month":1,"day":1}"#))
+                    .header("content-type", "application/x-www-form-urlencoded")
+                    .body(Body::from("year=2026&month=1&day=1"))
                     .unwrap(),
             )
             .await

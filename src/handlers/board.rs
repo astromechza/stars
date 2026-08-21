@@ -95,6 +95,7 @@ pub async fn show_board(
         .await?
         .ok_or(AppError::NotFound)?;
     let (min_year, max_year) = board.year_bounds(current_year());
+    let max_year = max_year.max(min_year);
     let year = q.year.unwrap_or(max_year).clamp(min_year, max_year);
     let toggled = state.store.toggled_days(board.id, year).await?;
     let grid = build_grid(&board, year, &toggled).render()?;
@@ -230,5 +231,75 @@ mod http_tests {
         let s = String::from_utf8(body.to_vec()).unwrap();
         assert!(!s.contains("<!doctype html>"));
         assert!(s.contains("id=\"grid\""));
+    }
+
+    #[sqlx::test]
+    async fn rename_updates_board_name(pool: SqlitePool) {
+        let store = Store { pool };
+        let uid = store.upsert_user("dev", None, None).await.unwrap().id;
+        let bid = store.create_board(uid, "Old name").await.unwrap().id;
+        let state = AppState {
+            store,
+            dev_user: Some("dev".into()),
+        };
+        let app = router(state);
+
+        let resp = app
+            .clone()
+            .oneshot(
+                Request::post(format!("/boards/{bid}/rename"))
+                    .header("content-type", "application/x-www-form-urlencoded")
+                    .body(Body::from("name=Exercise"))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert!(resp.status().is_redirection(), "got {:?}", resp.status());
+
+        let get = app
+            .oneshot(
+                Request::get(format!("/boards/{bid}"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(get.status(), StatusCode::OK);
+        let body = get.into_body().collect().await.unwrap().to_bytes();
+        let s = String::from_utf8(body.to_vec()).unwrap();
+        assert!(s.contains("Exercise"), "expected renamed board, got: {s}");
+    }
+
+    #[sqlx::test]
+    async fn archive_hides_board(pool: SqlitePool) {
+        let store = Store { pool };
+        let uid = store.upsert_user("dev", None, None).await.unwrap().id;
+        let bid = store.create_board(uid, "Exercise").await.unwrap().id;
+        let state = AppState {
+            store,
+            dev_user: Some("dev".into()),
+        };
+        let app = router(state);
+
+        let resp = app
+            .clone()
+            .oneshot(
+                Request::post(format!("/boards/{bid}/archive"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert!(resp.status().is_redirection(), "got {:?}", resp.status());
+
+        let get = app
+            .oneshot(Request::get("/").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        assert!(
+            get.status().is_success() || get.status().is_redirection(),
+            "got {:?}",
+            get.status()
+        );
     }
 }

@@ -34,3 +34,9 @@ body { background: var(--bg); color: var(--fg); font-family: system-ui, sans-ser
   color: #3a2d00; font-weight: 700; }
 .empty { text-align: center; padding: 3rem 0; }
 .board-title { text-align: center; }
+.board-manage { display: flex; gap: .5rem; align-items: center; justify-content: center;
+  margin-bottom: 1rem; flex-wrap: wrap; }
+.board-manage input[type="text"] { padding: .35rem .5rem; border: 1px solid var(--cell-border);
+  border-radius: 6px; background: var(--tab-bg); color: var(--fg); }
+.board-manage button { padding: .35rem .8rem; border: none; border-radius: 6px;
+  background: var(--tab-bg); color: var(--fg); cursor: pointer; }

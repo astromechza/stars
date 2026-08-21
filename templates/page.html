@@ -2,5 +2,15 @@
 {% block content %}
   {% include "tabs.html" %}
   <h1 class="board-title">{{ board_name }}</h1>
+  <div class="board-manage">
+    <form class="rename" method="post" action="/boards/{{ active_id }}/rename">
+      <input type="text" name="name" value="{{ board_name }}" aria-label="Board name" required>
+      <button type="submit">Rename</button>
+    </form>
+    <form class="archive" method="post" action="/boards/{{ active_id }}/archive"
+          onsubmit="return confirm('Archive this board? It will be hidden but not deleted.');">
+      <button type="submit">Archive</button>
+    </form>
+  </div>
   {{ grid_html|safe }}
 {% endblock %}

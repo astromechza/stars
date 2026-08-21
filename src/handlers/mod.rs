@@ -21,13 +21,15 @@ pub enum AppError {
 }
 
 impl From<sqlx::Error> for AppError {
-    fn from(_: sqlx::Error) -> Self {
+    fn from(e: sqlx::Error) -> Self {
+        tracing::error!(error = %e, "sqlx error");
         AppError::Internal
     }
 }
 
 impl From<askama::Error> for AppError {
-    fn from(_: askama::Error) -> Self {
+    fn from(e: askama::Error) -> Self {
+        tracing::error!(error = %e, "template error");
         AppError::Internal
     }
 }
