@@ -11,6 +11,8 @@ pub struct Cell {
     pub valid: bool,
     /// 0 = cleared, 1 = outline glow, 2 = full glow.
     pub state: u8,
+    /// True when this cell is the current date (only in the current year).
+    pub today: bool,
 }
 
 pub struct Column {
@@ -55,4 +57,6 @@ pub struct CellTemplate {
     pub day: u32,
     /// 0 = cleared, 1 = outline glow, 2 = full glow.
     pub state: u8,
+    /// True when this cell is the current date (only in the current year).
+    pub today: bool,
 }

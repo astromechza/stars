@@ -15,7 +15,7 @@
       <div class="col__label">{{ col.label }}</div>
       {% for cell in col.cells %}
         {% if cell.valid %}
-          <button class="cell {% if cell.state == 1 %}cell--outline{% else if cell.state == 2 %}cell--full{% endif %}"
+          <button class="cell {% if cell.state == 1 %}cell--outline{% else if cell.state == 2 %}cell--full{% endif %}{% if cell.today %} cell--today{% endif %}"
             hx-post="/boards/{{ board_id }}/toggle"
             hx-vals='{"year": {{ year }}, "month": {{ col.month }}, "day": {{ cell.day }}}'
             hx-swap="outerHTML">{{ cell.day }}</button>

@@ -15,7 +15,16 @@ pub struct YearQuery {
 }
 
 fn current_year() -> i32 {
-    chrono::Utc::now().format("%Y").to_string().parse().unwrap()
+    today_ymd().0
+}
+
+/// The current date as (year, month, day), in UTC.
+/// Distroless has no tzdata, so local time resolves to UTC there anyway;
+/// using UTC keeps this consistent with the rest of the app's timestamps.
+pub(crate) fn today_ymd() -> (i32, u32, u32) {
+    use chrono::Datelike;
+    let now = chrono::Utc::now();
+    (now.year(), now.month(), now.day())
 }
 
 pub fn build_grid(
@@ -24,6 +33,7 @@ pub fn build_grid(
     toggled: &std::collections::HashMap<(u32, u32), u8>,
 ) -> GridTemplate {
     let (min_year, max_year) = board.year_bounds(current_year());
+    let (ty, tm, td) = today_ymd();
     let mut max_days = 28;
     let columns = (1..=12u32)
         .map(|month| {
@@ -34,6 +44,7 @@ pub fn build_grid(
                     day,
                     valid: is_valid_day(year, month, day),
                     state: toggled.get(&(month, day)).copied().unwrap_or(0),
+                    today: year == ty && month == tm && day == td,
                 })
                 .collect();
             Column {

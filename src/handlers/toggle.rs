@@ -34,12 +34,14 @@ pub async fn toggle(
         .store
         .cycle_day(board.id, p.year, p.month, p.day)
         .await?;
+    let (ty, tm, td) = super::board::today_ymd();
     let cell = CellTemplate {
         board_id: board.id,
         year: p.year,
         month: p.month,
         day: p.day,
         state: cell_state,
+        today: p.year == ty && p.month == tm && p.day == td,
     };
     Ok(html(cell.render()?))
 }
