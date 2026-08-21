@@ -59,9 +59,9 @@ The app trusts the `Remote-User` / `Remote-Email` / `Remote-Name` headers, so it
   helm install stars oci://ghcr.io/astromechza/charts/stars --version 0.1.0
   ```
 
-  It deploys to Kubernetes with an Authelia-annotated ingress and a
-  `PersistentVolumeClaim` for the SQLite file (single replica, `Recreate`
-  strategy — SQLite is single-writer). Override values as usual, e.g.
+  It deploys to Kubernetes with an ingress and a `PersistentVolumeClaim` for
+  the SQLite file (single replica, `Recreate` strategy — SQLite is
+  single-writer). Override values as usual, e.g.
 
   ```bash
   helm install stars oci://ghcr.io/astromechza/charts/stars --version 0.1.0 \
@@ -81,6 +81,19 @@ The app trusts the `Remote-User` / `Remote-Email` / `Remote-Name` headers, so it
   **numeric** `runAsUser: 65532` — required on distroless, whose image `USER` is
   the non-numeric name `nonroot` that the kubelet cannot verify against
   `runAsNonRoot` (it otherwise fails with `CreateContainerConfigError`).
+
+  The app trusts the proxy's `Remote-*` headers, so it **must** sit behind an
+  auth proxy. `ingress.annotations` is empty by default — add your own (they
+  merge into the Ingress), e.g. Authelia forward-auth:
+
+  ```bash
+  helm install stars oci://ghcr.io/astromechza/charts/stars --version 0.2.0 \
+    --set-string ingress.annotations."nginx\.ingress\.kubernetes\.io/auth-url"="http://authelia.authelia.svc.cluster.local/api/verify" \
+    --set-string ingress.annotations."nginx\.ingress\.kubernetes\.io/auth-signin"="https://auth.example.com?rm=\$request_method" \
+    --set-string ingress.annotations."nginx\.ingress\.kubernetes\.io/auth-response-headers"="Remote-User,Remote-Email,Remote-Name,Remote-Groups"
+  ```
+
+  (A values file is cleaner than `--set-string` for several annotations.)
 
 ### Versioning
 

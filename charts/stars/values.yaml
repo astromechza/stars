@@ -40,10 +40,12 @@ ingress:
     enabled: false
     # Secret cert-manager writes the cert into. Defaults to <fullname>-tls.
     secretName: ""
-  # Authelia forward-auth annotations (adjust URLs to your Authelia install).
-  annotations:
-    nginx.ingress.kubernetes.io/auth-url: "http://authelia.authelia.svc.cluster.local/api/verify"
-    nginx.ingress.kubernetes.io/auth-signin: "https://auth.example.com?rm=$request_method"
-    nginx.ingress.kubernetes.io/auth-response-headers: "Remote-User,Remote-Email,Remote-Name,Remote-Groups"
+  # Extra ingress annotations (free-form; merged into the Ingress).
+  # The app trusts the proxy's Remote-* headers, so front it with Authelia
+  # forward-auth by adding something like (adjust URLs to your install):
+  #   nginx.ingress.kubernetes.io/auth-url: "http://authelia.authelia.svc.cluster.local/api/verify"
+  #   nginx.ingress.kubernetes.io/auth-signin: "https://auth.example.com?rm=$request_method"
+  #   nginx.ingress.kubernetes.io/auth-response-headers: "Remote-User,Remote-Email,Remote-Name,Remote-Groups"
+  annotations: {}
 
 env: {}
