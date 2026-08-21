@@ -1,0 +1,4 @@
+<button class="cell {% if on %}cell--on{% endif %}"
+  hx-post="/boards/{{ board_id }}/toggle"
+  hx-vals='{"year": {{ year }}, "month": {{ month }}, "day": {{ day }}}'
+  hx-swap="outerHTML">{{ day }}</button>

@@ -178,3 +178,57 @@ mod tests {
         assert_eq!(g.min_year, 2025);
     }
 }
+
+#[cfg(test)]
+mod http_tests {
+    use crate::handlers::{AppState, router};
+    use crate::store::Store;
+    use axum::body::Body;
+    use axum::http::{Request, StatusCode};
+    use http_body_util::BodyExt;
+    use sqlx::SqlitePool;
+    use tower::ServiceExt;
+
+    #[sqlx::test]
+    async fn full_page_vs_fragment(pool: SqlitePool) {
+        let store = Store { pool };
+        let uid = store.upsert_user("dev", None, None).await.unwrap().id;
+        let bid = store.create_board(uid, "Exercise").await.unwrap().id;
+        let state = AppState {
+            store,
+            dev_user: Some("dev".into()),
+        };
+        let app = router(state);
+
+        // Fresh load: full document with tabs.
+        let full = app
+            .clone()
+            .oneshot(
+                Request::get(format!("/boards/{bid}"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(full.status(), StatusCode::OK);
+        let body = full.into_body().collect().await.unwrap().to_bytes();
+        let s = String::from_utf8(body.to_vec()).unwrap();
+        assert!(s.contains("<!doctype html>"));
+        assert!(s.contains("Exercise"));
+
+        // HTMX request: grid fragment only.
+        let frag = app
+            .oneshot(
+                Request::get(format!("/boards/{bid}"))
+                    .header("HX-Request", "true")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let body = frag.into_body().collect().await.unwrap().to_bytes();
+        let s = String::from_utf8(body.to_vec()).unwrap();
+        assert!(!s.contains("<!doctype html>"));
+        assert!(s.contains("id=\"grid\""));
+    }
+}

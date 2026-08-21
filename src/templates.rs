@@ -44,3 +44,13 @@ pub struct EmptyTemplate {
     pub tabs: Vec<TabView>,
     pub active_id: i64,
 }
+
+#[derive(Template)]
+#[template(path = "cell.html")]
+pub struct CellTemplate {
+    pub board_id: i64,
+    pub year: i32,
+    pub month: u32,
+    pub day: u32,
+    pub on: bool,
+}
