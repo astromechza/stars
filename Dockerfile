@@ -1,0 +1,15 @@
+FROM rust:1-slim AS build
+RUN rustup target add x86_64-unknown-linux-musl && \
+    apt-get update && apt-get install -y musl-tools && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY . .
+RUN cargo build --release --target x86_64-unknown-linux-musl
+RUN cp target/x86_64-unknown-linux-musl/release/stars /stars
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /stars /stars
+ENV BIND_ADDR=0.0.0.0:8080 DATABASE_URL=sqlite:///data/stars.db
+EXPOSE 8080
+VOLUME ["/data"]
+USER nonroot
+ENTRYPOINT ["/stars"]
