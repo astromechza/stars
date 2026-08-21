@@ -105,4 +105,22 @@ mod tests {
         assert!(is_hx(&hm(&[("HX-Request", "true")])));
         assert!(!is_hx(&hm(&[])));
     }
+
+    #[test]
+    fn empty_remote_user_falls_back_to_dev() {
+        let id = resolve_identity(&hm(&[("Remote-User", "")]), Some("dev")).unwrap();
+        assert_eq!(id.subject, "dev");
+    }
+
+    #[test]
+    fn empty_dev_user_is_none() {
+        assert!(resolve_identity(&hm(&[]), Some("")).is_none());
+    }
+
+    #[test]
+    fn hx_header_case_insensitive() {
+        assert!(is_hx(&hm(&[("HX-Request", "True")])));
+        assert!(is_hx(&hm(&[("HX-Request", "TRUE")])));
+        assert!(!is_hx(&hm(&[("HX-Request", "false")])));
+    }
 }
