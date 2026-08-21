@@ -16,5 +16,7 @@ COPY --from=build /stars /stars
 ENV BIND_ADDR=0.0.0.0:8080 DATABASE_URL=sqlite:///data/stars.db
 EXPOSE 8080
 VOLUME ["/data"]
-USER nonroot
+# Numeric uid:gid (distroless "nonroot") so the kubelet can verify the image
+# runs as non-root without a pod-level runAsUser.
+USER 65532:65532
 ENTRYPOINT ["/stars"]
