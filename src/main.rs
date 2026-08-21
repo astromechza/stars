@@ -1,3 +1,4 @@
-fn main() {
-    println!("stars");
+#[tokio::main]
+async fn main() {
+    stars::run().await;
 }
