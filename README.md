@@ -76,6 +76,12 @@ The app trusts the `Remote-User` / `Remote-Email` / `Remote-Name` headers, so it
   certificate from that issuer's DNS-01 solver; the cert is stored in
   `ingress.tls.secretName` (defaults to `<release>-stars-tls`).
 
+  The pod and container security contexts are overridable via
+  `podSecurityContext` and `securityContext`. The pod context defaults to a
+  **numeric** `runAsUser: 65532` — required on distroless, whose image `USER` is
+  the non-numeric name `nonroot` that the kubelet cannot verify against
+  `runAsNonRoot` (it otherwise fails with `CreateContainerConfigError`).
+
 ### Versioning
 
 A pushed `v*` tag is the single source of truth. On that tag the pipeline
