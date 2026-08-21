@@ -3,6 +3,7 @@ use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use std::str::FromStr;
 
 pub mod board;
+pub mod toggle;
 pub mod user;
 
 pub use board::Board;
