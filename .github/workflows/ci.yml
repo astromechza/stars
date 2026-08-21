@@ -48,6 +48,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            STARS_VERSION=${{ steps.meta.outputs.version }}
 
   chart:
     needs: test
@@ -64,3 +66,29 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           helm package charts/stars --version "$version" --app-version "$version"
           helm push "stars-${version}.tgz" oci://ghcr.io/astromechza/charts
+
+  release:
+    needs: [image, chart]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Compute version
+        id: v
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            ### Artifacts
+
+            **Container image**
+            ```
+            ghcr.io/astromechza/stars:${{ steps.v.outputs.version }}
+            ```
+            **Helm chart**
+            ```
+            helm install stars oci://ghcr.io/astromechza/charts/stars --version ${{ steps.v.outputs.version }}
+            ```

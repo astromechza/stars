@@ -4,6 +4,9 @@ RUN rustup target add x86_64-unknown-linux-musl && \
 ENV CC_x86_64_unknown_linux_musl=musl-gcc \
     CC_x86_64-unknown-linux-musl=musl-gcc
 WORKDIR /app
+# Release version baked into the binary; empty => falls back to Cargo.toml.
+ARG STARS_VERSION=""
+ENV STARS_VERSION=${STARS_VERSION}
 COPY . .
 RUN cargo build --release --target x86_64-unknown-linux-musl
 RUN cp target/x86_64-unknown-linux-musl/release/stars /stars

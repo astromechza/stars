@@ -64,11 +64,19 @@ The app trusts the `Remote-User` / `Remote-Email` / `Remote-Name` headers, so it
   strategy — SQLite is single-writer). Override values as usual, e.g.
   `--set ingress.host=stars.example.com --set ingress.className=traefik`.
 
-Both the image and the chart are published together when a `v*` tag is pushed:
+### Versioning
+
+A pushed `v*` tag is the single source of truth. On that tag the pipeline
+publishes, all stamped with the same `X.Y.Z`: the container image, the Helm
+chart (`version` and `appVersion`), the version baked into the binary
+(`stars --version`, also logged at startup), and a GitHub Release with generated
+notes.
 
 ```bash
 git tag v0.1.0 && git push origin v0.1.0
 ```
+
+Local and branch builds fall back to the `Cargo.toml` version.
 
 ## Development
 

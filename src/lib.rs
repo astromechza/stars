@@ -10,6 +10,9 @@ use config::Config;
 use handlers::AppState;
 use store::Store;
 
+/// Release version, baked at build time (see build.rs).
+pub const VERSION: &str = env!("STARS_VERSION");
+
 pub async fn run() {
     tracing_subscriber::fmt()
         .with_env_filter(
@@ -30,6 +33,6 @@ pub async fn run() {
     let listener = tokio::net::TcpListener::bind(&cfg.bind_addr)
         .await
         .expect("failed to bind");
-    tracing::info!("listening on {}", cfg.bind_addr);
+    tracing::info!("stars {} listening on {}", VERSION, cfg.bind_addr);
     axum::serve(listener, app).await.expect("server error");
 }
