@@ -48,3 +48,19 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  chart:
+    needs: test
+    # Publish the Helm chart only on version tags (e.g. v0.1.0).
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: Log in to GHCR
+        run: helm registry login ghcr.io -u ${{ github.actor }} --password-stdin <<< "${{ secrets.GITHUB_TOKEN }}"
+      - name: Package and push chart
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          helm package charts/stars --version "$version" --app-version "$version"
+          helm push "stars-${version}.tgz" oci://ghcr.io/astromechza/charts

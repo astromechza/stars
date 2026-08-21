@@ -52,9 +52,23 @@ The app trusts the `Remote-User` / `Remote-Email` / `Remote-Name` headers, so it
 
 - Container images are built and pushed to `ghcr.io/astromechza/stars` by the
   GitHub Actions pipeline.
-- A [Helm chart](charts/stars) deploys it to Kubernetes with an Authelia-annotated
-  ingress and a `PersistentVolumeClaim` for the SQLite file (single replica,
-  `Recreate` strategy — SQLite is single-writer).
+- The [Helm chart](charts/stars) is published as an OCI artifact to
+  `ghcr.io/astromechza/charts` on version tags. Install it with:
+
+  ```bash
+  helm install stars oci://ghcr.io/astromechza/charts/stars --version 0.1.0
+  ```
+
+  It deploys to Kubernetes with an Authelia-annotated ingress and a
+  `PersistentVolumeClaim` for the SQLite file (single replica, `Recreate`
+  strategy — SQLite is single-writer). Override values as usual, e.g.
+  `--set ingress.host=stars.example.com --set ingress.className=traefik`.
+
+Both the image and the chart are published together when a `v*` tag is pushed:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
 
 ## Development
 
