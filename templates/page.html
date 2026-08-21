@@ -1,16 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
-  {% include "tabs.html" %}
   <h1 class="board-title">{{ board_name }}</h1>
-  <div class="board-manage">
+  {% include "tabs.html" %}
+  <div class="board-bar">
+    <button type="button" class="btn" popovertarget="board-menu">Manage board</button>
+  </div>
+  <div id="board-menu" popover="auto" class="popover" aria-label="Board settings">
+    <h2 class="popover__title">Manage board</h2>
     <form class="rename" method="post" action="/boards/{{ active_id }}/rename">
-      <input type="text" name="name" value="{{ board_name }}" aria-label="Board name" required>
+      <label class="field">Name
+        <input type="text" name="name" value="{{ board_name }}" required>
+      </label>
       <button type="submit">Rename</button>
     </form>
     <form class="archive" method="post" action="/boards/{{ active_id }}/archive"
           onsubmit="return confirm('Archive this board? It will be hidden but not deleted.');">
-      <button type="submit">Archive</button>
+      <button type="submit" class="btn--danger">Archive board</button>
     </form>
+    <button type="button" class="popover__close" popovertarget="board-menu"
+            popovertargetaction="hide">Close</button>
   </div>
   {{ grid_html|safe }}
 {% endblock %}
