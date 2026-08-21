@@ -1,0 +1,29 @@
+<div id="grid" class="grid"
+     style="--cols: 12; --rows: {{ max_days }};">
+  <div class="grid__nav">
+    <button {% if year <= min_year %}disabled{% endif %}
+      hx-get="/boards/{{ board_id }}?year={{ year - 1 }}"
+      hx-target="#grid" hx-swap="outerHTML">&lt;</button>
+    <span class="grid__year">{{ year }}</span>
+    <button {% if year >= max_year %}disabled{% endif %}
+      hx-get="/boards/{{ board_id }}?year={{ year + 1 }}"
+      hx-target="#grid" hx-swap="outerHTML">&gt;</button>
+  </div>
+  <div class="grid__cols">
+    {% for col in columns %}
+    <div class="col">
+      <div class="col__label">{{ col.label }}</div>
+      {% for cell in col.cells %}
+        {% if cell.valid %}
+          <button class="cell {% if cell.on %}cell--on{% endif %}"
+            hx-post="/boards/{{ board_id }}/toggle"
+            hx-vals='{"year": {{ year }}, "month": {{ col.month }}, "day": {{ cell.day }}}'
+            hx-swap="outerHTML">{{ cell.day }}</button>
+        {% else %}
+          <span class="cell cell--empty"></span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>

@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block content %}
+  {% include "tabs.html" %}
+  <h1 class="board-title">{{ board_name }}</h1>
+  {{ grid_html|safe }}
+{% endblock %}

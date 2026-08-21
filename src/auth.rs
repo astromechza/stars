@@ -64,6 +64,32 @@ impl<S: Send + Sync> FromRequestParts<S> for UserId {
     }
 }
 
+pub async fn auth_middleware(
+    axum::extract::State(state): axum::extract::State<crate::handlers::AppState>,
+    mut req: axum::http::Request<axum::body::Body>,
+    next: axum::middleware::Next,
+) -> axum::response::Response {
+    use axum::response::IntoResponse;
+    let Some(identity) = resolve_identity(req.headers(), state.dev_user.as_deref()) else {
+        return axum::http::StatusCode::UNAUTHORIZED.into_response();
+    };
+    match state
+        .store
+        .upsert_user(
+            &identity.subject,
+            identity.email.as_deref(),
+            identity.name.as_deref(),
+        )
+        .await
+    {
+        Ok(user) => {
+            req.extensions_mut().insert(UserId(user.id));
+            next.run(req).await
+        }
+        Err(_) => axum::http::StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

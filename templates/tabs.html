@@ -1,0 +1,9 @@
+<nav class="tabs">
+  {% for t in tabs %}
+    <a class="tab {% if t.id == active_id %}tab--active{% endif %}"
+       href="/boards/{{ t.id }}">{{ t.name }}</a>
+  {% endfor %}
+  <form class="tab-new" method="post" action="/boards">
+    <button type="submit" title="New board">+</button>
+  </form>
+</nav>
