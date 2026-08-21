@@ -2,8 +2,10 @@ use sqlx::SqlitePool;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use std::str::FromStr;
 
+pub mod board;
 pub mod user;
 
+pub use board::Board;
 pub use user::User;
 
 #[derive(Clone)]
