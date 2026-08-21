@@ -30,16 +30,16 @@ pub async fn toggle(
     if !(1..=12).contains(&p.month) || !is_valid_day(p.year, p.month, p.day) {
         return Err(AppError::BadRequest);
     }
-    let on = state
+    let cell_state = state
         .store
-        .toggle_day(board.id, p.year, p.month, p.day)
+        .cycle_day(board.id, p.year, p.month, p.day)
         .await?;
     let cell = CellTemplate {
         board_id: board.id,
         year: p.year,
         month: p.month,
         day: p.day,
-        on,
+        state: cell_state,
     };
     Ok(html(cell.render()?))
 }
@@ -65,10 +65,9 @@ mod tests {
         (router(state), board.id)
     }
 
-    #[sqlx::test]
-    async fn toggle_roundtrip_returns_on_cell(pool: SqlitePool) {
-        let (app, bid) = app_with_board(pool).await;
+    async fn post_toggle(app: &axum::Router, bid: i64) -> String {
         let resp = app
+            .clone()
             .oneshot(
                 Request::post(format!("/boards/{bid}/toggle"))
                     .header("content-type", "application/x-www-form-urlencoded")
@@ -79,8 +78,30 @@ mod tests {
             .unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
         let body = resp.into_body().collect().await.unwrap().to_bytes();
-        let s = String::from_utf8(body.to_vec()).unwrap();
-        assert!(s.contains("cell--on"), "expected on cell, got: {s}");
+        String::from_utf8(body.to_vec()).unwrap()
+    }
+
+    #[sqlx::test]
+    async fn toggle_cycles_outline_full_cleared(pool: SqlitePool) {
+        let (app, bid) = app_with_board(pool).await;
+
+        let first = post_toggle(&app, bid).await;
+        assert!(
+            first.contains("cell--outline"),
+            "1st click -> outline, got: {first}"
+        );
+
+        let second = post_toggle(&app, bid).await;
+        assert!(
+            second.contains("cell--full"),
+            "2nd click -> full, got: {second}"
+        );
+
+        let third = post_toggle(&app, bid).await;
+        assert!(
+            !third.contains("cell--outline") && !third.contains("cell--full"),
+            "3rd click -> cleared, got: {third}"
+        );
     }
 
     #[sqlx::test]

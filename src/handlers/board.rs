@@ -21,7 +21,7 @@ fn current_year() -> i32 {
 pub fn build_grid(
     board: &Board,
     year: i32,
-    toggled: &std::collections::HashSet<(u32, u32)>,
+    toggled: &std::collections::HashMap<(u32, u32), u8>,
 ) -> GridTemplate {
     let (min_year, max_year) = board.year_bounds(current_year());
     let mut max_days = 28;
@@ -33,7 +33,7 @@ pub fn build_grid(
                 .map(|day| Cell {
                     day,
                     valid: is_valid_day(year, month, day),
-                    on: toggled.contains(&(month, day)),
+                    state: toggled.get(&(month, day)).copied().unwrap_or(0),
                 })
                 .collect();
             Column {
@@ -168,14 +168,17 @@ mod tests {
             archived_at: None,
             sort_order: 0,
         };
-        let mut set = std::collections::HashSet::new();
-        set.insert((1u32, 1u32));
+        let mut set = std::collections::HashMap::new();
+        set.insert((1u32, 1u32), 2u8); // Jan 1 at full glow
+        set.insert((1u32, 2u32), 1u8); // Jan 2 at outline
         let g = build_grid(&board, 2026, &set);
         // Feb column: day 29 invalid in 2026 (not leap)
         let feb = &g.columns[1];
         assert!(!feb.cells[28].valid); // index 28 => day 29
-        // Jan day 1 on
-        assert!(g.columns[0].cells[0].on);
+        // Jan states carried through
+        assert_eq!(g.columns[0].cells[0].state, 2); // day 1 full
+        assert_eq!(g.columns[0].cells[1].state, 1); // day 2 outline
+        assert_eq!(g.columns[0].cells[2].state, 0); // day 3 cleared
         assert_eq!(g.min_year, 2025);
     }
 }

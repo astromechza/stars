@@ -30,8 +30,12 @@ body { background: var(--bg); color: var(--fg); font-family: system-ui, sans-ser
   border-radius: 6px; background: var(--cell-off); color: var(--fg);
   font-size: .7rem; cursor: pointer; padding: 0; }
 .cell--empty { visibility: hidden; }
-.cell--on { background: var(--gold); box-shadow: 0 0 8px 2px var(--gold-glow);
-  color: #3a2d00; font-weight: 700; }
+/* State 1: outline glow — dim interior, gold ring. */
+.cell--outline { border-color: var(--gold); color: var(--gold); font-weight: 700;
+  box-shadow: 0 0 6px 1px var(--gold-glow); }
+/* State 2: full glow — whole shape lit. */
+.cell--full { background: var(--gold); border-color: var(--gold);
+  box-shadow: 0 0 10px 3px var(--gold-glow); color: #3a2d00; font-weight: 700; }
 .empty { text-align: center; padding: 3rem 0; }
 .board-title { text-align: center; }
 .board-manage { display: flex; gap: .5rem; align-items: center; justify-content: center;

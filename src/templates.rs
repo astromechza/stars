@@ -9,7 +9,8 @@ pub struct TabView {
 pub struct Cell {
     pub day: u32,
     pub valid: bool,
-    pub on: bool,
+    /// 0 = cleared, 1 = outline glow, 2 = full glow.
+    pub state: u8,
 }
 
 pub struct Column {
@@ -52,5 +53,6 @@ pub struct CellTemplate {
     pub year: i32,
     pub month: u32,
     pub day: u32,
-    pub on: bool,
+    /// 0 = cleared, 1 = outline glow, 2 = full glow.
+    pub state: u8,
 }
