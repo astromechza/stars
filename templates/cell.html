@@ -1,4 +1,4 @@
-<button class="cell{% if weekend %} cell--weekend{% endif %} {% if state == 1 %}cell--outline{% else if state == 2 %}cell--full{% endif %}{% if today %} cell--today{% endif %}"
+<button class="cell{% if weekend %} cell--weekend{% endif %}{% if state == 1 %} cell--outline{% else if state == 2 %} cell--full{% endif %}{% if today %} cell--today{% endif %}"
   hx-post="/boards/{{ board_id }}/toggle"
   hx-vals='{"year": {{ year }}, "month": {{ month }}, "day": {{ day }}}'
   hx-swap="outerHTML">{{ day }}</button>

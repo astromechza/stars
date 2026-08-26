@@ -40,12 +40,15 @@ pub fn build_grid(
             let dim = days_in_month(year, month);
             max_days = max_days.max(dim);
             let cells = (1..=31u32)
-                .map(|day| Cell {
-                    day,
-                    valid: is_valid_day(year, month, day),
-                    state: toggled.get(&(month, day)).copied().unwrap_or(0),
-                    today: year == ty && month == tm && day == td,
-                    weekend: is_weekend(year, month, day),
+                .map(|day| {
+                    let valid = is_valid_day(year, month, day);
+                    Cell {
+                        day,
+                        valid,
+                        state: toggled.get(&(month, day)).copied().unwrap_or(0),
+                        today: year == ty && month == tm && day == td,
+                        weekend: valid && is_weekend(year, month, day),
+                    }
                 })
                 .collect();
             Column {
