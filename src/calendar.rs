@@ -25,6 +25,15 @@ pub fn is_valid_day(year: i32, month: u32, day: u32) -> bool {
     day >= 1 && day <= days_in_month(year, month)
 }
 
+/// True when the given date falls on a Saturday or Sunday.
+/// Returns false for dates that don't exist (e.g. Feb 30).
+pub fn is_weekend(year: i32, month: u32, day: u32) -> bool {
+    use chrono::{Datelike, NaiveDate, Weekday};
+    NaiveDate::from_ymd_opt(year, month, day)
+        .map(|d| matches!(d.weekday(), Weekday::Sat | Weekday::Sun))
+        .unwrap_or(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -45,6 +54,16 @@ mod tests {
         assert_eq!(days_in_month(2024, 1), 31);
         assert_eq!(days_in_month(2024, 13), 0);
         assert_eq!(days_in_month(2024, 0), 0);
+    }
+
+    #[test]
+    fn weekends() {
+        // 2026-08-29 Sat, 2026-08-30 Sun, 2026-08-31 Mon.
+        assert!(is_weekend(2026, 8, 29));
+        assert!(is_weekend(2026, 8, 30));
+        assert!(!is_weekend(2026, 8, 31));
+        // Non-existent date is not a weekend.
+        assert!(!is_weekend(2026, 2, 30));
     }
 
     #[test]

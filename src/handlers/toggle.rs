@@ -1,6 +1,6 @@
 use super::{AppError, AppState, html};
 use crate::auth::UserId;
-use crate::calendar::is_valid_day;
+use crate::calendar::{is_valid_day, is_weekend};
 use crate::templates::CellTemplate;
 use askama::Template;
 use axum::Form;
@@ -42,6 +42,7 @@ pub async fn toggle(
         day: p.day,
         state: cell_state,
         today: p.year == ty && p.month == tm && p.day == td,
+        weekend: is_weekend(p.year, p.month, p.day),
     };
     Ok(html(cell.render()?))
 }

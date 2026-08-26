@@ -9,6 +9,7 @@
   --surface-hover: #efece5;
   --surface-border: #cbc7be;
   --cell-off: #e1ded7;
+  --cell-weekend: #d3dbe0;
   --cell-border: #cac6bd;
   --gold: #d99b1c;
   --gold-glow: rgba(217, 155, 28, .45);
@@ -27,6 +28,7 @@
     --surface-hover: #2d3138;
     --surface-border: #383d45;
     --cell-off: #23262c;
+    --cell-weekend: #2a3138;
     --cell-border: #3c414a;
     --gold: #f2c14e;
     --gold-glow: rgba(242, 193, 78, .55);
@@ -157,6 +159,9 @@ body {
 }
 .cell:hover { border-color: var(--gold); color: var(--fg); }
 .cell--empty { visibility: hidden; }
+
+/* Weekend: cooler tint on the base cell. Full glow overrides the background. */
+.cell--weekend { background: var(--cell-weekend); }
 
 /* State 1: outline glow — dim interior, gold ring. */
 .cell--outline {

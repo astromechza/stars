@@ -13,6 +13,8 @@ pub struct Cell {
     pub state: u8,
     /// True when this cell is the current date (only in the current year).
     pub today: bool,
+    /// True when the day falls on a Saturday or Sunday.
+    pub weekend: bool,
 }
 
 pub struct Column {
@@ -59,4 +61,6 @@ pub struct CellTemplate {
     pub state: u8,
     /// True when this cell is the current date (only in the current year).
     pub today: bool,
+    /// True when the day falls on a Saturday or Sunday.
+    pub weekend: bool,
 }
