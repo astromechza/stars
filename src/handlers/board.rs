@@ -1,6 +1,6 @@
 use super::{AppError, AppState, html};
 use crate::auth::{HxRequest, UserId};
-use crate::calendar::{MONTH_LABELS, days_in_month, is_valid_day};
+use crate::calendar::{MONTH_LABELS, days_in_month, is_valid_day, is_weekend};
 use crate::store::Board;
 use crate::templates::{Cell, Column, EmptyTemplate, GridTemplate, PageTemplate, TabView};
 use askama::Template;
@@ -45,6 +45,7 @@ pub fn build_grid(
                     valid: is_valid_day(year, month, day),
                     state: toggled.get(&(month, day)).copied().unwrap_or(0),
                     today: year == ty && month == tm && day == td,
+                    weekend: is_weekend(year, month, day),
                 })
                 .collect();
             Column {
