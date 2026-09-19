@@ -73,9 +73,9 @@ pub fn build_grid(
 /// Summarise a year's marked cells: full-glow (2) days are "true",
 /// outline (1) days are marked-but-false. Cleared days have no entry.
 pub(crate) fn year_stats(year: i32, toggled: &std::collections::HashMap<(u32, u32), u8>) -> Stats {
+    // Cleared days have no entry, so every entry is marked (state 1 or 2).
+    let marked = toggled.len() as u32;
     let true_count = toggled.values().filter(|&&s| s == 2).count() as u32;
-    let outline_count = toggled.values().filter(|&&s| s == 1).count() as u32;
-    let marked = true_count + outline_count;
     Stats {
         true_count,
         true_ratio_pct: percent(true_count, marked),

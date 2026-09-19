@@ -24,7 +24,6 @@ pub struct Column {
 }
 
 /// Per-year summary shown above the grid columns.
-#[derive(Default)]
 pub struct Stats {
     /// Number of full-glow (state 2) cells: the "true" days.
     pub true_count: u32,
