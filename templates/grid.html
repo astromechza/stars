@@ -9,6 +9,7 @@
       hx-get="/boards/{{ board_id }}?year={{ year + 1 }}"
       hx-target="#grid" hx-swap="outerHTML">&gt;</button>
   </div>
+  {% include "stats.html" %}
   <div class="grid__cols">
     {% for col in columns %}
     <div class="col">

@@ -1,8 +1,8 @@
 use super::{AppError, AppState, html};
 use crate::auth::{HxRequest, UserId};
-use crate::calendar::{MONTH_LABELS, days_in_month, is_valid_day, is_weekend};
+use crate::calendar::{MONTH_LABELS, days_in_month, days_in_year, is_valid_day, is_weekend};
 use crate::store::Board;
-use crate::templates::{Cell, Column, EmptyTemplate, GridTemplate, PageTemplate, TabView};
+use crate::templates::{Cell, Column, EmptyTemplate, GridTemplate, PageTemplate, Stats, TabView};
 use askama::Template;
 use axum::Form;
 use axum::extract::{Path, Query, State};
@@ -65,7 +65,29 @@ pub fn build_grid(
         max_year,
         max_days,
         columns,
+        stats: year_stats(year, toggled),
+        stats_oob: false,
     }
+}
+
+/// Summarise a year's marked cells: full-glow (2) days are "true",
+/// outline (1) days are marked-but-false. Cleared days have no entry.
+pub(crate) fn year_stats(year: i32, toggled: &std::collections::HashMap<(u32, u32), u8>) -> Stats {
+    // Cleared days have no entry, so every entry is marked (state 1 or 2).
+    let marked = toggled.len() as u32;
+    let true_count = toggled.values().filter(|&&s| s == 2).count() as u32;
+    Stats {
+        true_count,
+        true_ratio_pct: percent(true_count, marked),
+        year_coverage_pct: percent(marked, days_in_year(year)),
+    }
+}
+
+/// numerator / denominator as a rounded whole percent; 0 when denominator is 0.
+fn percent(numerator: u32, denominator: u32) -> u32 {
+    (numerator * 100 + denominator / 2)
+        .checked_div(denominator)
+        .unwrap_or(0)
 }
 
 async fn tabs(state: &AppState, user_id: i64) -> Result<Vec<TabView>, AppError> {
@@ -195,6 +217,19 @@ mod tests {
         assert_eq!(g.columns[0].cells[1].state, 1); // day 2 outline
         assert_eq!(g.columns[0].cells[2].state, 0); // day 3 cleared
         assert_eq!(g.min_year, 2025);
+        // Stats: 1 full (true), 1 outline (marked but not true), rest cleared.
+        assert_eq!(g.stats.true_count, 1);
+        assert_eq!(g.stats.true_ratio_pct, 50); // 1 true of 2 marked
+        assert_eq!(g.stats.year_coverage_pct, 1); // 2 of 365 rounds to 1%
+    }
+
+    #[test]
+    fn percent_rounds_and_guards_zero() {
+        assert_eq!(percent(0, 0), 0);
+        assert_eq!(percent(5, 0), 0);
+        assert_eq!(percent(1, 2), 50);
+        assert_eq!(percent(1, 3), 33);
+        assert_eq!(percent(2, 3), 67); // rounds up
     }
 }
 
