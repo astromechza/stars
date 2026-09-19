@@ -125,6 +125,23 @@ body {
 .grid__nav button { min-width: 2.4rem; }
 .grid__year { font-weight: 700; font-size: 1.1rem; min-width: 4ch; text-align: center; }
 
+.grid__stats {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.stat { display: flex; align-items: baseline; gap: .35rem; }
+.stat__val { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.stat__label {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .grid__cols {
   display: grid;
   grid-template-columns: repeat(var(--cols, 12), minmax(1.9rem, 1fr));

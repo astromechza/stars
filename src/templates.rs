@@ -32,6 +32,13 @@ pub struct GridTemplate {
     pub max_year: i32,
     pub max_days: u32,
     pub columns: Vec<Column>,
+    /// Number of full-glow (state 2) cells: the "true" days.
+    pub true_count: u32,
+    /// true / (true + outline) as a whole percent; 0 when nothing is set.
+    pub true_ratio_pct: u32,
+    /// (true + outline) / days-in-year as a whole percent: how much of the
+    /// year has been marked either way.
+    pub year_coverage_pct: u32,
 }
 
 #[derive(Template)]

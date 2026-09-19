@@ -6,6 +6,10 @@ pub fn is_leap_year(year: i32) -> bool {
     (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
 }
 
+pub fn days_in_year(year: i32) -> u32 {
+    if is_leap_year(year) { 366 } else { 365 }
+}
+
 pub fn days_in_month(year: i32, month: u32) -> u32 {
     match month {
         1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
@@ -44,6 +48,12 @@ mod tests {
         assert!(is_leap_year(2000));
         assert!(!is_leap_year(1900));
         assert!(!is_leap_year(2023));
+    }
+
+    #[test]
+    fn days_per_year() {
+        assert_eq!(days_in_year(2024), 366);
+        assert_eq!(days_in_year(2023), 365);
     }
 
     #[test]

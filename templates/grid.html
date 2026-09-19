@@ -9,6 +9,20 @@
       hx-get="/boards/{{ board_id }}?year={{ year + 1 }}"
       hx-target="#grid" hx-swap="outerHTML">&gt;</button>
   </div>
+  <div class="grid__stats">
+    <span class="stat">
+      <span class="stat__val">{{ true_count }}</span>
+      <span class="stat__label">true</span>
+    </span>
+    <span class="stat">
+      <span class="stat__val">{{ true_ratio_pct }}%</span>
+      <span class="stat__label">true of marked</span>
+    </span>
+    <span class="stat">
+      <span class="stat__val">{{ year_coverage_pct }}%</span>
+      <span class="stat__label">of year marked</span>
+    </span>
+  </div>
   <div class="grid__cols">
     {% for col in columns %}
     <div class="col">
