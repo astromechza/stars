@@ -1,0 +1,14 @@
+<div id="grid-stats" class="grid__stats"{% if stats_oob %} hx-swap-oob="true"{% endif %}>
+  <span class="stat">
+    <span class="stat__val">{{ stats.true_count }}</span>
+    <span class="stat__label">true</span>
+  </span>
+  <span class="stat">
+    <span class="stat__val">{{ stats.true_ratio_pct }}%</span>
+    <span class="stat__label">true of marked</span>
+  </span>
+  <span class="stat">
+    <span class="stat__val">{{ stats.year_coverage_pct }}%</span>
+    <span class="stat__label">of year marked</span>
+  </span>
+</div>

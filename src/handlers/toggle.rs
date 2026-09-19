@@ -34,6 +34,9 @@ pub async fn toggle(
         .store
         .cycle_day(board.id, p.year, p.month, p.day)
         .await?;
+    // Recompute the year's stats so the toggle response can refresh them
+    // out-of-band, keeping the summary in sync with the cell just changed.
+    let toggled = state.store.toggled_days(board.id, p.year).await?;
     let (ty, tm, td) = super::board::today_ymd();
     let cell = CellTemplate {
         board_id: board.id,
@@ -43,6 +46,8 @@ pub async fn toggle(
         state: cell_state,
         today: p.year == ty && p.month == tm && p.day == td,
         weekend: is_weekend(p.year, p.month, p.day),
+        stats: super::board::year_stats(p.year, &toggled),
+        stats_oob: true,
     };
     Ok(html(cell.render()?))
 }
@@ -104,6 +109,28 @@ mod tests {
         assert!(
             !third.contains("cell--outline") && !third.contains("cell--full"),
             "3rd click -> cleared, got: {third}"
+        );
+    }
+
+    #[sqlx::test]
+    async fn toggle_refreshes_stats_out_of_band(pool: SqlitePool) {
+        let (app, bid) = app_with_board(pool).await;
+
+        // One click -> outline (marked, not true): 0 true, 100% of year marked
+        // is not it — just assert the OOB stats block rides along and reflects
+        // the change (1 marked day, 0 true).
+        let first = post_toggle(&app, bid).await;
+        assert!(
+            first.contains("id=\"grid-stats\"") && first.contains("hx-swap-oob=\"true\""),
+            "toggle response must carry OOB stats, got: {first}"
+        );
+
+        // Second click -> full (true). The refreshed stats must now show 1 true.
+        let second = post_toggle(&app, bid).await;
+        assert!(second.contains("cell--full"), "2nd click -> full: {second}");
+        assert!(
+            second.contains(">1</span>") && second.contains("true of marked"),
+            "stats should report 1 true after a full toggle, got: {second}"
         );
     }
 

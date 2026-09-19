@@ -2,7 +2,7 @@ use super::{AppError, AppState, html};
 use crate::auth::{HxRequest, UserId};
 use crate::calendar::{MONTH_LABELS, days_in_month, days_in_year, is_valid_day, is_weekend};
 use crate::store::Board;
-use crate::templates::{Cell, Column, EmptyTemplate, GridTemplate, PageTemplate, TabView};
+use crate::templates::{Cell, Column, EmptyTemplate, GridTemplate, PageTemplate, Stats, TabView};
 use askama::Template;
 use axum::Form;
 use axum::extract::{Path, Query, State};
@@ -58,9 +58,6 @@ pub fn build_grid(
             }
         })
         .collect();
-    let true_count = toggled.values().filter(|&&s| s == 2).count() as u32;
-    let outline_count = toggled.values().filter(|&&s| s == 1).count() as u32;
-    let marked = true_count + outline_count;
     GridTemplate {
         board_id: board.id,
         year,
@@ -68,6 +65,18 @@ pub fn build_grid(
         max_year,
         max_days,
         columns,
+        stats: year_stats(year, toggled),
+        stats_oob: false,
+    }
+}
+
+/// Summarise a year's marked cells: full-glow (2) days are "true",
+/// outline (1) days are marked-but-false. Cleared days have no entry.
+pub(crate) fn year_stats(year: i32, toggled: &std::collections::HashMap<(u32, u32), u8>) -> Stats {
+    let true_count = toggled.values().filter(|&&s| s == 2).count() as u32;
+    let outline_count = toggled.values().filter(|&&s| s == 1).count() as u32;
+    let marked = true_count + outline_count;
+    Stats {
         true_count,
         true_ratio_pct: percent(true_count, marked),
         year_coverage_pct: percent(marked, days_in_year(year)),
@@ -209,9 +218,9 @@ mod tests {
         assert_eq!(g.columns[0].cells[2].state, 0); // day 3 cleared
         assert_eq!(g.min_year, 2025);
         // Stats: 1 full (true), 1 outline (marked but not true), rest cleared.
-        assert_eq!(g.true_count, 1);
-        assert_eq!(g.true_ratio_pct, 50); // 1 true of 2 marked
-        assert_eq!(g.year_coverage_pct, 1); // 2 of 365 rounds to 1%
+        assert_eq!(g.stats.true_count, 1);
+        assert_eq!(g.stats.true_ratio_pct, 50); // 1 true of 2 marked
+        assert_eq!(g.stats.year_coverage_pct, 1); // 2 of 365 rounds to 1%
     }
 
     #[test]
