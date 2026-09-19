@@ -76,11 +76,9 @@ pub fn build_grid(
 
 /// numerator / denominator as a rounded whole percent; 0 when denominator is 0.
 fn percent(numerator: u32, denominator: u32) -> u32 {
-    if denominator == 0 {
-        0
-    } else {
-        (numerator * 100 + denominator / 2) / denominator
-    }
+    (numerator * 100 + denominator / 2)
+        .checked_div(denominator)
+        .unwrap_or(0)
 }
 
 async fn tabs(state: &AppState, user_id: i64) -> Result<Vec<TabView>, AppError> {
